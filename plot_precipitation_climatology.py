@@ -51,6 +51,14 @@ def create_plot(clim, model, season, gridlines=False,levels=None):
     
     title = f'{model} precipitation climatology ({season})'
     plt.title(title)
+    
+def apply_mask(darray, sftlf_file, realm):
+    dset_mask = xr.open_dataset(sftlf_file)
+    if realm=='land':
+        masked_array = darray.where(dset_mask['sftlf'] >= 0.5)
+    elif realm=='ocean':
+        masked_array = darray.where(dset_mask['sftlf'] < 0.5)
+    return masked_array
 
 
 def main(inargs):
@@ -60,6 +68,10 @@ def main(inargs):
     
     clim = dset['pr'].groupby('time.season').mean('time', keep_attrs=True)
     clim = convert_pr_units(clim)
+    
+    if inargs.mask:
+        sftlf_file, realm = inargs.mask
+        clim = apply_mask(clim,sftlf_file, realm)
 
     create_plot(clim, dset.attrs['source_id'], inargs.season, gridlines=inargs.gridlines, levels=inargs.cbar_levels)
     plt.savefig(inargs.output_file, dpi=200)
@@ -74,6 +86,11 @@ if __name__ == '__main__':
     parser.add_argument("output_file", type=str, help="Output file name")
     parser.add_argument("--gridlines",action='store_true',default=False, help='Include gridlines on the plot')
     parser.add_argument("--cbar_levels",nargs='*',type=float, default=None,help='Define ticks on colorbar')
+    parser.add_argument("--mask", type=str, nargs=2,
+                        metavar=('SFTLF_FILE', 'REALM'), default=None,
+                        help="""Provide sftlf file and realm to mask ('land' or 'ocean')""")
+
+
     args = parser.parse_args()
     
     main(args)
