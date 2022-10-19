@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cmocean
 
+#Random testing comment
+
 
 def convert_pr_units(darray):
     """Convert kg m-2 s-1 to mm day-1.
@@ -35,7 +37,6 @@ def create_plot(clim, model, season, gridlines=False,levels=None):
     """
     if not levels:
         levels = np.arange(0, 13.5, 1.5)
-    print(levels)
         
     fig = plt.figure(figsize=[12,5])
     ax = fig.add_subplot(111, projection=ccrs.PlateCarree(central_longitude=180))
